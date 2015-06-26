@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+	</head>
+	<body>
+		<H1>Streaming video!</H1>
+		<video width="272" height="480" controls="controls"
+			poster="pitch-poster.jpg">
+			<source src="pitch.mp4" preload="none" type="video/mp4"/>
+			Your browser doesn't support the &lt;video&gt; element. You can <A HREF="pitch.mp4" download="pitch.mp4">download</A> the file instead.
+		</video>
+
+		<H1>Streaming audio!</H1>
+		<script>
+		"use strict";
+		var playSong = function() {
+			var song = document.getElementById("hammerSong");
+			song.play();
+		}
+		var pauseSong = function() {
+			var song = document.getElementById("hammerSong");
+			song.pause();
+		}
+		var rewindSong = function() {
+			var song = document.getElementById("hammerSong");
+			song.currentTime = 0;
+		}
+		</script>
+		<audio controls="controls" preload="none" loop id="hammerSong">
+			<source src="hammer.mp3" type="audio/mp3"/>
+			Your browser doesn't support the &lt;audio&gt; element. You can <A HREF="hammer.mp3" download="hammer.mp3">download</A> the file instead.
+		</audio><br>
+		<button onclick="playSong();" stype="cursor:pointer;">Play That Funky Music</button><br>
+		<button onclick="pauseSong();" stype="cursor:pointer;">Pause That Funky Music</button><br>
+		<button onclick="rewindSong();" stype="cursor:pointer;">Rewind That Funky Music</button><br>
+
+		<H1>Webcam</H1>
+		<video width="640" height="480" id="webcamVideo" controls autoplay>You don't seem to have a webcam available.</video>
+		<script>
+		"use strict";
+		function onWebcamSuccess(stream) {
+			console.log("Success?");
+			var output = document.getElementById('webcamVideo');
+			output.src = window.URL.createObjectURL(stream);
+			output.play();
+			console.log("Success!");
+		}
+		function onWebcamError() {
+			console.log("getUserMedia API error\n");
+		}
+		navigator.getUserMedia = (navigator.getUserMedia ||
+								  navigator.webkitGetUserMedia ||
+								  navigator.mozGetUserMedia ||
+								  navigator.msGetUserMedia);
+		if (navigator.getUserMedia) {
+			var beans = navigator.getUserMedia({video:true,audio:true},
+				onWebcamSuccess,
+				onWebcamError);
+			console.log(beans);
+		} else {
+			console.log("No webcam for you!");
+		}
+		</script>
+	</body>
+</html>
