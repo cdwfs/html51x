@@ -20,12 +20,17 @@
 			Your browser doesn't support the &lt;video&gt; element. You can <A HREF="pitch.mp4" download="pitch.mp4">download</A> the file instead.
 		</video>
 
+		<canvas id="myCanvas3" width="1000" height="400"
+			style="border:1px solid blue">
+			Canvas is not supported by your browser. WTF dude.
+		</canvas>
+
 		<script>
 		"use strict";
 		function myCanvasInit() {
 			var canvas = document.querySelector("#myCanvas");
 			var ctx = canvas.getContext("2d");
-			
+
 			// Draw some stuff
 			ctx.fillRect(10,10, 100, 100);
 			ctx.strokeStyle="blue"
@@ -56,8 +61,49 @@
 				ctx.restore();
 			}
 			imageObj.src = "html5.jpg";
-			
 			setInterval("processFrame()", 17); // call each 25 ms
+
+			var canvas3 = document.querySelector("#myCanvas3");
+			var ctx3 = canvas3.getContext("2d");
+			// Regular paths are just a series of lineTo()s
+			ctx3.beginPath();
+			ctx3.moveTo(50,50);
+			ctx3.lineTo(50,100);
+			ctx3.lineTo(100,100);
+			ctx3.stroke();
+
+			// Or use quadraticCurveTo() to specify a single control point
+			// and an endpoint
+			ctx3.beginPath();
+			ctx3.moveTo(150,50);
+			ctx3.quadraticCurveTo(150,100, 200,100);
+			ctx3.stroke();
+
+			// Or use bezierCurveTo() to specify two control points
+			// and an endpoint.
+			ctx3.beginPath();
+			ctx3.moveTo(250,50);
+			ctx3.bezierCurveTo(250,100, 275,150, 300,100);
+			ctx3.stroke();
+
+			// a more complex bezier path, automatically closed at
+			// the end
+			ctx3.beginPath();
+			ctx3.moveTo(350, 50);
+			ctx3.bezierCurveTo(350,100, 375,150, 400,100);
+			ctx3.closePath();
+			ctx3.fill();
+
+			// arcs
+			ctx3.beginPath();
+			ctx3.arc(50,200, 25, 0, Math.PI/2, false); // drawn clockwise
+			ctx3.fill(); // note: filling an arc does not give a wedge; it connects the start to the end like any other curve
+
+			// arcTo takes an intersection point and an endpoint.
+			// It's mainly used for rounded rectangles
+			//ctx3.arcTo(intx, inty, endx, endy);
+			
+			
 		}
 		var angle = 0;
 		function processFrame() {
