@@ -61,6 +61,7 @@
 		}
 		var angle = 0;
 		function processFrame() {
+			console.time("draw timer");
 			var canvas2 = document.querySelector("#myCanvas2");
 			var ctx2 = canvas2.getContext("2d");
 			var video = document.querySelector("#pitchVideo");
@@ -72,7 +73,7 @@
 			angle += 0.001;
 			ctx2.drawImage(video, 0,0, canvas2.width, canvas2.height);
 			ctx2.restore();
-			
+			console.timeEnd("draw timer");
 		}
 		window.onload = myCanvasInit; // Don't grab a context until the page is ready!
 		</script>
