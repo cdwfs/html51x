@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+	</head>
+	<body>
+		<script>
+		function makeDoubleDelegate(f1,f2) {
+			"use strict";
+			return function(){
+				if (f1) f1();
+				if (f2) f2();
+			}
+		}
+		</script>
+
+		<H2>Animation</H2>
+		<P>Two old &amp; busted techniques:
+			<ul>
+				<li><tt>setInterval(func,ms)</tt> -- call func() immediately, and then everyms milliseconds thereafter. setInterval() returns an id, which can be passed to clearInterval(id) to stop calling func().</li>
+				<li><tt>setTimeout(func,ms)</tt> -- call func() once after ms milliseconds. For continuous animation, func() itself should call setTimeout() before it returns to schedule the next invocation. It also returns an ID; the callback can be cancelled with <tt>clearTimeout(id)</tt>.</li>
+			</ul>
+			Both have serious issues. setInterval() is not well-suited
+			to running multiple animations simultaneously, and the
+			function called may interrupt itself (if its running time
+			is long, or the ms interval is too small). In both
+			functions, the timing is not terribly reliable; it may
+			wait longer than the specified interval before calling
+			func(). This makes these functions unsuitable for smooth
+			animation.</P>
+
+		<P>The preferred HTML5 technique is <tt>requestAnimationFrame(func)</tt>,
+			which works like an improved setTimeOut() that always
+			invokes the specified function in 1/60th of a second. It
+			has much more accurate timing, it automatically merges
+			multiple animation requests, and it's better optimized for
+			mobile devices. The function called by
+			requestAnimationFrame() also receives an optional <tt>timeStamp</tt> argument,
+			which contains the time the function was
+			called. requestAnimationFrame() returns an ID which can be
+			passed to <tt>cancelAnimationFrame()</tt> to cancel the callback.</P>
+		<canvas id="canvasAnim" width="300" height="300"
+			style="border:1px solid black;">
+			Canvas is not supported by your browser. WTF dude.
+		</canvas>
+		<script>
+		var spinAngle = 0;
+		var timeStampPrevious;
+		function drawCanvasAnim(timeStamp) {
+			"use strict";
+			if (typeof timeStampPrevious === 'undefined')
+				timeStampPrevious = timeStamp;
+			var dtSec = (timeStamp - timeStampPrevious) * 0.001;
+			timeStampPrevious = timeStamp;
+			
+			var canvas = document.querySelector("#canvasAnim");
+			var ctx = canvas.getContext("2d");
+			ctx.save();
+			ctx.clearRect(0,0, canvas.width, canvas.height);
+			ctx.translate(canvas.width/2, canvas.height/2);
+			ctx.rotate(spinAngle);
+			spinAngle += 2*Math.PI*0.25 * dtSec;
+			ctx.translate(-canvas.width/2, -canvas.height/2);
+			ctx.fillStyle = "red";
+			ctx.fillRect(canvas.width/4, canvas.height/4,
+				canvas.width/2, canvas.height/2);
+			ctx.strokeStyle = "black";
+			ctx.lineWidth = 2;
+			ctx.strokeRect(canvas.width/4, canvas.height/4,
+				canvas.width/2, canvas.height/2);
+			ctx.restore();
+			var requestId = requestAnimationFrame(drawCanvasAnim);
+		}
+		window.onload= makeDoubleDelegate(window.onload, function() {
+			"use strict";
+			var requestId = requestAnimationFrame(drawCanvasAnim);
+		});
+		</script>
+
+		
+		<H2>User Input</H2>
+
+		<P>User input to web pages is handled by binding callback functions to specific <A HREF="http://www.w3.org/TR/2000/REC-DOM-Level-2-Events-20001113/events.html#Events-eventgroupings">events</A> that occur on various HTML elements.</P>
+		
+		<P>For simple cases, event handlers can be declared directly
+			inside HTML elements: <input type="button" value="Alert!" onclick="alert('Button clicked!');"/> Event
+			handlers can also be bound in JavaScript (e.g. set the
+			button object's <tt>onclick</tt> property). However, this approach only allows a single function to be attacked to each event.</P>
+
+		<P>A better approach is is use an element's <tt>addEventListener('eventName', function(event)</tt> method. This
+		automatically keeps track of a list of listeners for each
+		element, so multiple callbacks can be registered for the same
+			element/event pair. <input type="button" value="DoubleAlert!" id="doubleAlertButton"/></P>
+		<script>
+		var alertButton = document.querySelector("#doubleAlertButton");
+		alertButton.addEventListener('click', function(evt) {
+			alert("Alert #1!");
+			console.log(evt); // The event contents vary for each event type
+		});
+		alertButton.addEventListener('click', function(evt) {
+			alert("Alert #2!");
+		});
+		</script>
+
+		<P>For keyboard events, use the <tt>keydown</tt> and <tt>keyup</tt> events,
+			and comparing the evt.keyCode against the values in <A HREF="https://css-tricks.com/snippets/javascript/javascript-keycodes/">this table</A></P>
+
+		<P>To read keyboard events from a canvas, the canvas must have focus. To do this, set the <tt>tabindex="1"</tt> attribute on the canvas element, and then call <tt>canvas.focus()</tt> in code to force the canvas into focus. <tt>canvas.blur()</tt> is
+			the cleverly-named opposite of focus(); it forces an element
+			to lose focus. One suggested practice is to use the canvas
+			'mouseenter' and 'mouseout' events to focus/unfocus the
+			canvas.</P>
+		<canvas id="canvasFocus" width="400" height="200" style="border:black 1px solid"
+			onMouseEnter='document.querySelector("#canvasFocus").style.border = "red 1px solid";'
+			onMouseOut='document.querySelector("#canvasFocus").style.border = "black 1px solid";'
+			>
+			Canvas is not supported by your browser. WTF dude.
+		</canvas>
+
+		<P>For mouse events, the two tricky parts are choosing the
+			right event (mouseenter, mouseover, mouseup, etc.) and getting
+			the mouse coordinates relative to the canvas. The incoming
+			MouseEvent has clientX and clientY properties, but they're
+			relative to the window. Use getBoundingClientRect() to convert
+			them to canvas-relative coordinates.</P>
+		<canvas id="canvasMouse" width="200" height="50" style="border:black 1px solid">
+			Canvas is not supported by your browser. WTF dude.
+		</canvas>
+		<script>
+		window.onload= makeDoubleDelegate(window.onload, function() {
+			"use strict";
+			var canvas = document.querySelector("#canvasMouse");
+			var ctx = canvas.getContext("2d");
+			window.addEventListener('mousemove',
+				function(evt) {
+					ctx.save();
+					ctx.clearRect(0,0, canvas.width, canvas.height);
+					var rect = canvas.getBoundingClientRect();
+					ctx.fillText("Canvas Coords: "
+						+ (evt.clientX - rect.left) + ","
+						+ (evt.clientY - rect.top), 10,30);
+					ctx.restore();
+				});
+		});
+		</script>
+		
+		<H2>Canvas Auto-resizing</H2>
+		<P>Using CSS percentage-style dimensions on a Canvas just
+			scales the existing pixels, which usually isn't the
+			desired effect. It also doesn't trigger a redraw (unless
+			you hook up an event listener).</P>
+		<canvas id="scaledCanvasCss"
+			style="border:1px solid black; width:90%; height:200px;">
+			Canvas is not supported by your browser. WTF dude.
+		</canvas>
+		<script>
+		window.onload = makeDoubleDelegate(window.onload, function() {
+			"use strict";
+			var canvas = document.querySelector("#scaledCanvasCss");
+			var ctx = canvas.getContext("2d");
+			ctx.fillStyle = "red";
+			ctx.fillRect(canvas.width/4, canvas.height/4,
+				canvas.width/2, canvas.height/2);
+			ctx.strokeStyle = "black";
+			ctx.lineWidth = 2;
+			ctx.strokeRect(canvas.width/4, canvas.height/4,
+				canvas.width/2, canvas.height/2);
+		});
+		</script>
+		
+		<P>Directly changing <tt>canvas.width</tt> and <tt>canvas.height</tt> works,
+			but erases any existing canvas contents. This may be
+			acceptable if the canvas is being redrawn each frame, but
+			it interferes effects like motion blur that rely on the
+			previous frame's contents.</P>
+		<canvas id="scaledCanvasDirect" width="200" height="200"
+			style="border:1px solid black;">
+			Canvas is not supported by your browser. WTF dude.
+		</canvas><br>
+		<script>
+		function drawCanvasDirect() {
+			"use strict";
+			var canvas = document.querySelector("#scaledCanvasDirect");
+			var ctx = canvas.getContext("2d");
+			ctx.fillStyle = "red";
+			ctx.fillRect(canvas.width/4, canvas.height/4,
+				canvas.width/2, canvas.height/2);
+			ctx.strokeStyle = "black";
+			ctx.lineWidth = 2;
+			ctx.strokeRect(canvas.width/4, canvas.height/4,
+				canvas.width/2, canvas.height/2);
+		}
+		window.onload= makeDoubleDelegate(window.onload, function() {
+			"use strict";
+			drawCanvasDirect();
+		});
+		window.addEventListener('resize', function() {
+			"use strict";
+			var canvas = document.querySelector("#scaledCanvasDirect");
+			canvas.width = window.innerWidth * 0.9;
+		});
+		</script>
+		<input type="button" value="Redraw" onclick="drawCanvasDirect()"/>
+
+		<P>The preferred solution is to combine these two methods:
+			wrap the canvas in a &lt;DIV&gt;, use CSS-style dimensions
+			on the &lt;DIV&gt;, add a resize event listener to the
+			parent, and force a redraw after the canvas is resized.
+			<B>Note:</B>: There's no way to listen for a DIV
+			resize, so it's usually safe to listen for the window
+			resize instead.</P>
+		<div id="scaledCanvasCorrectParent" style="width:90%; height:200;">
+			<canvas id="scaledCanvasCorrect" width="200" height="200"
+				style="border:1px solid black;">
+				Canvas is not supported by your browser. WTF dude.
+			</canvas>
+		</div><br>
+		<script>
+		function drawCanvasCorrect() {
+			"use strict";
+			var canvas = document.querySelector("#scaledCanvasCorrect");
+			var ctx = canvas.getContext("2d");
+			ctx.fillStyle = "red";
+			ctx.fillRect(canvas.width/4, canvas.height/4,
+				canvas.width/2, canvas.height/2);
+			ctx.strokeStyle = "black";
+			ctx.lineWidth = 2;
+			ctx.strokeRect(canvas.width/4, canvas.height/4,
+				canvas.width/2, canvas.height/2);
+		}
+		window.onload= makeDoubleDelegate(window.onload, function() {
+			"use strict";
+			var canvas = document.querySelector("#scaledCanvasCorrect");
+			canvas.width  = document.querySelector("#scaledCanvasCorrectParent").clientWidth;
+			//canvas.height = document.querySelector("#scaledCanvasCorrectParent").clientHeight;
+			drawCanvasCorrect();
+		});
+		window.addEventListener('resize', function() {
+			"use strict";
+			var canvas = document.querySelector("#scaledCanvasCorrect");
+			canvas.width  = document.querySelector("#scaledCanvasCorrectParent").clientWidth;
+			//canvas.height = document.querySelector("#scaledCanvasCorrectParent").clientHeight;
+			drawCanvasCorrect();
+		});
+		</script>
+		
+	</body>
+</html>
