@@ -1,0 +1,27 @@
+CACHE MANIFEST
+
+# This section lists files that should be cached locally. It must include
+# ALL files that should be cached. This can be tedious to maintain; tools
+# like manifestR (http://westciv.com/tools/manifestR/) automate the busywork.
+CACHE:
+# pages
+/week6.html
+
+# This section indicates that all remaining files should ALWAYS be
+# loaded from the network every time they're accessed. Any files that
+# can't be accessed will cause the FALLBACK file to be displayed
+# instead. A wilcard (*) means "always load all files not explicitly
+# mentioned in the CACHE or FALLBACK section.
+NETWORK:
+*
+
+# This section lists files to display if a NETWORK resource can not be
+# accessed, or is missing from the cache. Each line has a partial URL
+# ("/" means "everything under the root) and a file to display for missing
+# resources matching that URL.
+FALLBACK:
+/ /week6-offline.html
+# Could also specify missing images
+/images/ /images/missing.png
+
+# 
