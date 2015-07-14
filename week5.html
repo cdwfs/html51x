@@ -5,7 +5,10 @@
   </head>
   <style>
   input:invalid {
-	background-color: pink; /* malformed form inputs are colored */
+	background-color: lightPink;
+  }
+  input:valid {
+	background-color: lightGreen;
   }
   </style>
   <body>
@@ -34,7 +37,14 @@
 	  addresses will be detected automatically, and users will be
 	  prompted to correct them.</P>
 
-	<!-- TODO: pattern-based validation, URL, phone, range, placeholder  -->
+	<!-- TODO:
+	- pattern-based validation (sample patterns at http://html5pattern.com/)
+	- URL
+	- tel
+	- range
+	- list
+	- placeholder
+	-->
 	<form id="bioForm">
 	  <fieldset>
 		<legend>Form Inputs</legend>
