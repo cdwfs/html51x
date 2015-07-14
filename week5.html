@@ -1,51 +1,51 @@
 <!doctype html>
 <html lang="en">
-	<head>
-		<meta charset="utf-8">
-	</head>
-	<style>
-	input:invalid {
-		background-color: pink; /* malformed form inputs are colored */
+  <head>
+	<meta charset="utf-8">
+  </head>
+  <style>
+  input:invalid {
+	background-color: pink; /* malformed form inputs are colored */
+  }
+  </style>
+  <body>
+	<script>
+	function makeDoubleDelegate(f1,f2) {
+	  "use strict";
+	  return function(){
+		if (f1) f1();
+		if (f2) f2();
+	  }
 	}
-	</style>
-	<body>
-		<script>
-		function makeDoubleDelegate(f1,f2) {
-			"use strict";
-			return function(){
-				if (f1) f1();
-				if (f2) f2();
-			}
-		}
-		</script>
+	</script>
+	
+	<H2>Accessibility</H2>
 
-		<H2>Accessibility</H2>
+	<P>&lt;label&gt; and &lt;fieldset&gt; elements make forms
+	  significantly more accessible, for both disabled users and
+	  mobile browsers. Inputs can be separate or nested within
+	  their assocated labels, but the latter can make CSS
+	  styling easier. Also worth specifying the language of the
+	  label.</P>
 
-		<P>&lt;label&gt; and &lt;fieldset&gt; elements make forms
-			significantly more accessible, for both disabled users and
-			mobile browsers. Inputs can be separate or nested within
-			their assocated labels, but the latter can make CSS
-			styling easier. Also worth specifying the language of the
-			label.</P>
+	<P>An input with a "required" attribute will trigger internal
+	  validation when the form is submitted. Common mistakes like
+	  out-of-range numbers, invalid dates or malformed email
+	  addresses will be detected automatically, and users will be
+	  prompted to correct them.</P>
 
-		<P>An input with a "required" attribute will trigger internal
-			validation when the form is submitted. Common mistakes like
-			out-of-range numbers, invalid dates or malformed email
-			addresses will be detected automatically, and users will be
-			prompted to correct them.</P>
-
-		<!-- TODO: pattern-based validation, URL, phone, range, placeholder  -->
-		<form id="bioForm">
-			<fieldset>
-				<legend>Form Inputs</legend>
-				<label for="name"><span lang="en">Name:</span><input id="name" type="text"/></label><br>
-				<label for="email"><span lang="en">Email:</span><input id="email" type="email" required/></label><br>
-				<label for="mo5"><span lang="en">Multiple of five:</span><input type="number" id="mo5" min="0" max="100" step="5" required/></label><br>
-				<input type="radio" name="igot" id="poison" checked/><label for="poison"><span lang="en">The Poison</span></label><br>
-				<input type="radio" name="igot" id="remedy"/><label for="remedy"><span lang="en">The Remedy</span></label><br>
-				<label for="birthday"><span lang="en">Date of Birth:</span><input id="birthday" type="date"/></label><br>
-				<label for="formColor"><span lang="en">Form Color:</span><input type="color" id="formColor"/></label><br> <!-- As of mid-2015, not available in IE/Safari -->
-				<label for="bio"><span lang="en">Character Sketch:</span><br><textarea id="bio"></textarea></label><br>
+	<!-- TODO: pattern-based validation, URL, phone, range, placeholder  -->
+	<form id="bioForm">
+	  <fieldset>
+		<legend>Form Inputs</legend>
+		<label for="name"><span lang="en">Name:</span><input id="name" type="text"/></label><br>
+		<label for="email"><span lang="en">Email:</span><input id="email" type="email" required/></label><br>
+		<label for="mo5"><span lang="en">Multiple of five:</span><input type="number" id="mo5" min="0" max="100" step="5" required/></label><br>
+		<input type="radio" name="igot" id="poison" checked/><label for="poison"><span lang="en">The Poison</span></label><br>
+		<input type="radio" name="igot" id="remedy"/><label for="remedy"><span lang="en">The Remedy</span></label><br>
+		<label for="birthday"><span lang="en">Date of Birth:</span><input id="birthday" type="date"/></label><br>
+		<label for="formColor"><span lang="en">Form Color:</span><input type="color" id="formColor"/></label><br> <!-- As of mid-2015, not available in IE/Safari -->
+		<label for="bio"><span lang="en">Character Sketch:</span><br><textarea id="bio"></textarea></label><br>
 			</fieldset>
 			<input type="submit"/>
 		</form>
