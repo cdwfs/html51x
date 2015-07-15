@@ -3,8 +3,182 @@
   <head>
 	<meta charset="utf-8"/>
 	<title>HTML5.1x Week 6</title>
+	<style>
+	#status {
+	  color: white;
+	  padding: 5px;
+	}
+	.online {
+	  background:green;
+	}
+	.offline {
+	  background:red;
+	}
+	</style>
   </head>
   <body>
-	<p>Contents have been cached.</p>
+	<H2>HTML5 Cache API</H2>
+	<p>Contents have been cached, except for this image:</p>
+	<img width="285" height="234" alt="awesome cat picture" src="images/cat.png"/>
+	<p><strong>NOTE:</strong> Caching only works if the server is configured to serve .appcache files using the proper MIME type (e.g. "AddType text/cache-manifest .appcache")</p>
+
+	<H2>Connectivity Check</H2>
+	<article>
+
+	  <P>The <tt>navigator.onLine</tt> variable stores whether the
+		browser is connected to the network or not. This does not
+		necessarily mean it can reach any given server, but if the value
+		is false it's not even worth trying.</P>
+	  
+	  <p>Current browser network status: <span id="onlineStatus">checking...</span></P>
+	  
+	  <ol id="onlineEventList"></ol>
+	</article>
+	<script>
+	"use strict";
+	var statusElem = document.querySelector("#onlineStatus");
+	var eventList = document.querySelector("#onlineEventList");
+	function onOnlineEvent(event) {
+	  // Change className to inherit appropriate CSS style
+	  statusElem.className = navigator.onLine ? 'online' : 'offline';
+	  // change displayed text
+	  statusElem.innerHTML = navigator.onLine ? 'online' : 'offline';
+	  // append a new event to the state list
+	  eventList.innerHTML += '<li>New event: ' + event.type + '</li>';
+	}
+	// Listen for the 'online' and 'offline' event to react to connectivity changes
+	window.addEventListener('online', onOnlineEvent, false);
+	window.addEventListener('offline', onOnlineEvent, false);
+	// Force a call once to initialize the state properly
+	onOnlineEvent( {type:'ready'} );
+	</script>
+
+	<h2>Web Storage API</h2>
+
+	<p>The Web Storage API provides mechanisms for storing and
+	  retrieving data on the client side. Like cookies, but larger and
+	  more sophisticated. For example, cookies are always shared by
+	  any tabs open to the same domain; sessionStorage data is scoped
+	  per-tab.</p>
+	
+	<p>Two interfaces are provided: <tt>localStorage</tt>
+	  data is stored until explicitly delated, while <tt>sessionStorage</tt>
+	  data is erased when the tab/browser is closed. Both interfaces
+	  are a simple key/value dictionary, with a separate dictionary
+	  for each domain.</p>
+
+	<P>Possible use cases include:</P>
+	<UL>
+	  <LI>Form contents (update them live; re-populate on page reload)</LI>
+	  <LI>Persistent Site-wide user preferences</LI>
+	</UL>
+	<script>
+	"use strict";
+	localStorage.firstName  = "Bugs";
+	localStorage.lastName   = "Bunny";
+	localStorage.homePlanet = "Earth";
+	// Can also use localStorage.getItem("key")
+	// and localStorage.setItem("key",value).
+	// localStorage.removeItem("key") removes a key entirely.
+	// localStorage.clear() wipes the domain's dictionary entirely.
+	</script>
+	
+	<H2>File API</H2>
+	<P>The HTML5 File API allows the manipulation of files on the user's local drive, without (necessarily) sending them to a server.</P>
+	<article>
+	  <P>Select one or more files (only the first will be displayed):
+		<input type="file" id="inputFile"
+			onchange="displayFileMetadata();"/></P>
+	  <ul>
+		<li>File name: <span id="inputFileName"</span></li>
+		<li>File size: <span id="inputFileSize"</span></li>
+		<li>File type: <span id="inputFileType"</span></li>
+		<li>Last modified: <span id="inputFileModified"</span></li>
+	  </ul>
+	  <script>
+	  function displayFileMetadata() {
+		"use strict";
+		var firstFile = document.querySelector("#inputFile").files[0];
+		document.querySelector("#inputFileName").innerHTML     = firstFile.name;
+		document.querySelector("#inputFileSize").innerHTML     = firstFile.size;
+		document.querySelector("#inputFileType").innerHTML     = firstFile.type;
+		document.querySelector("#inputFileModified").innerHTML = firstFile.lastModifiedDate;
+	  }
+	  </script>
+	</article>
+
+	<article>
+	  <P>Select one or more image files:
+		<input type="file" id="inputImageFiles" accept="image/*" multiple
+			onchange="generateMetadataTable(this.files);"/><br>
+		<div id="result"></div>
+		<script>
+		function generateMetadataTable(files) {
+		  "use strict";
+		  var output = '<table border="1"><tr><th>Name</th><th>Bytes</th><th>MIME Type</th><th>Modified</th></tr>';
+		  for(var iFile=0; iFile<files.length; iFile += 1) {
+			var f = files[iFile];
+			output += '<tr><td>' + f.name
+			  + '</td><td style="text-align:right">' + f.size
+			  + '</td><td>' + f.type
+			  + '</td><td>' + f.lastModifiedDate
+			  + '</td></tr>';
+		  }
+		  output += '</table>';
+		  document.querySelector("#result").innerHTML = output;
+		  }
+		</script>
+	</article>
+
+	<H2>Geolocation API</H2>
+	<P>Personally I disable this shit ASAP, but by all means go ahead and exploit it!</P>
+	<div id="geolocOutput"></div>
+	<script>
+	function displayPosition(pos) {
+	  "use strict";
+	  document.querySelector("#geolocOutput").innerHTML = ""
+		+ "latitude: "  + pos.coords.latitude + "<br>"
+		+ "longitude: " + pos.coords.longitude + "<br>"
+		+ "altitude: " + pos.coords.altitude + "<br>"
+		+ "accuracy (m): " + pos.coords.accuracy + "<br>"
+		+ "altitude accuracy (m): " + pos.coords.altitudeAccuracy + "<br>"
+		+ "heading (deg from N): " + pos.coords.heading + "<br>"
+		+ "speed (m/sec): " + pos.coords.speed + "<br>"
+	}
+	function geolocationErrorCallback(err) {
+	  var output = "Geolocation API error: " + err.message;
+	  switch(err.code) {
+		case err.TIMEOUT:
+		  output += " [error.code: TIMEOUT]<br>";
+		  break;
+		case err.PERMISSION_DENIED:
+		  output += " [error.code: PERMISSION_DENIED]<br>";
+		  break;
+		case err.POSITION_UNAVAILABLE:
+		  output += " [error.code: POSITION_UNAVAILABLE]<br>";
+		  break;
+		case err.UNKNOWN_ERROR:
+		  output += " [error.code: UNKNOWN_ERROR]<br>";
+		  break;
+	  }
+	  document.querySelector("#geolocOutput").innerHTML = output;
+	}
+	var geolocOptions = {
+	  enableHighAccuracy: true, // use GPS plz!
+	  maximumAge: 600000, // time in ms to cache each pos reading. Useful for tunnels.
+	  timeout: 100 // time in ms to wait for a reading before invoking error callback
+	};
+	// For one-time location info:
+	//navigator.geolocation.CurrentPosition(
+	// displayPosition,gelocationErrorCallback, geolocOptions);
+
+	// For real-time updates (whenever position changes signficantly)
+	var watchPosId = navigator.geolocation.watchPosition(
+	  displayPosition, delocationErrorCallback, geolocOptions);
+	// Cancel with navigation.geolocation.clearWatch(watchPosId)
+	</script>
+	<P>And from there you can use e.g. the <A HREF="https://developers.google.com/maps/documentation/staticmaps/">Google Static Map API</A> to show a simple map at the specified coordinates, or the <A HREF="https://developers.google.com/maps/tutorials/">Google Maps API</A> to
+	display a more interactive map centered at the provided lat/lon
+	  coordinates, or use the <A HREF="https://developers.google.com/maps/documentation/javascript/examples/geocoding-reverse">Google Reverse Geocoding JavaScript API</A> to extract traditional address data from a lat/lon pair.</P>
   </body>
 </html>
