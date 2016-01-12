@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+	    <meta charset="utf-8"/>
+	    <title>HTML5.1x Week 6</title>
+    </head>
+    <body>
+        <section><article>
+            <P>Example of downloading and processing an audio file using asynchronous XHR requests and WebAudio:</P>
+            <!-- F'ing cross-origin nonsense -->
+            <button onclick='downloadSoundFile("http://127.0.0.1/hammer.mp3")'>Download</button>
+            <button id="playButton" onclick='playSound()' disabled>Start</button>
+            <button id="stopButton" onclick='stopSound()' disabled>Stop</button><br>
+            <progress id="downloadProgress" value="0"></progress>
+            <script>
+             var audioContext = new window.AudioContext();
+             var audioSource = null;
+             var audioBuffer = null;
+             function stopSound() {
+                 "use strict";
+                 if (audioSource) {
+                     audioSource.stop();
+                 }
+             }
+             function playSound() {
+                 "use strict";
+                 audioSource = audioContext.createBufferSource();
+                 audioSource.buffer = audioBuffer;
+                 audioSource.loop = true;
+                 audioSource.connect(audioContext.destination);
+                 audioSource.start(0);
+             }
+             function initSound(audioFile) {
+                 "use strict";
+                 audioContext.decodeAudioData(audioFile,
+                                              function(buffer) {
+                                                  console.log("song decoded");
+                                                  audioBuffer = buffer;
+                                                  // enable playback buttons
+                                                  document.querySelector("#playButton").disabled = false;
+                                                  document.querySelector("#stopButton").disabled = false;
+                                              },
+                                              function(e) {
+                                                  console.log("Decoding error", e);
+                                              });
+             }
+             function downloadSoundFile(url) {
+                 "use strict";
+                 var xhr = new XMLHttpRequest();
+                 xhr.open("GET", url, true);
+                 xhr.responseType = "arraybuffer";
+                 xhr.onload = function(e) {
+                     initSound(this.response);
+                 };
+                 xhr.onprogress = function(e) {
+                     document.querySelector("#downloadProgress").value = e.loaded;
+                     document.querySelector("#downloadProgress").max   = e.total;
+                 };
+                 // Other XHR callbacks: onloadstart, onabort, onerror, onload, ontimeout, onloadend
+                 xhr.onerror = function(e) {
+                     console.log("download error");
+                 };
+                 xhr.send();
+                 console.log("request sent");
+             }
+            </script>
+        </article><hr><article>
+            <P>Example of saving a canvas image to the local disk:</P>
+            <div id="dragDropDiv">
+		        <canvas id="dragDropCanvas" width="512" height="512"
+			            style="border:1px solid black;"
+                        draggable="true" ondragstart="dragStartHandler(event)">
+			        Canvas is not supported by your browser. WTF dude.
+		        </canvas>
+            </div>
+            <script>
+             function dragStartHandler(e) {
+                 "use strict";
+                 console.log("drag start");
+                 var element = e.target;
+                 var src;
+                 if (element.tagName === "IMG" && element.src.indexOf("data:") === 0) {
+                     src = element.src;
+                 }
+                 else if (element.tagName === "CANVAS") {
+                     src = element.toDataURL();
+                 }
+                 if (src) {
+                     var name = element.getAttribute("alt") || "download";
+                     var mime = src.split(";")[0].split("data:")[1];
+                     var ext = mime.split("/")[1] || "png";
+                     var download = mime + ":" + name + "." + ext + ":" + src;
+                     e.dataTransfer.setData("DownloadURL", download);
+                 }
+             }
+             function drawCanvas() {
+                 "use strict";
+                 var canvas = document.querySelector("#dragDropCanvas");
+                 var ctx = canvas.getContext("2d");
+                 
+                 var lingrad = ctx.createLinearGradient(0,0,512,512);
+                 lingrad.addColorStop(0.0, "#000");
+                 lingrad.addColorStop(0.5, "#669");
+                 lingrad.addColorStop(1.0, "#fff");
+                 ctx.fillStyle = lingrad;
+                 ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                 /*
+                 // Create an image from the canvas
+                 var img = new Image();
+                 img.src = canvas.toDataURL("image/png");
+                 img.alt = "downloaded-from-image";
+                 img.draggable = 'true'; // not necessary; images are draggable by default.
+                 img.addEventListener('dragstart', dragStartHandler, false);
+                 document.querySelector("#dragDropDiv").appendChild(img);
+                 */
+             }
+             drawCanvas();
+            </script>
+        </article><hr><article>
+            <P>paintable canvas:</P>
+            <div id="paintableDiv">
+		        <canvas id="paintableCanvas" width="512" height="512"
+			            style="border:1px solid black;"
+			        Canvas is not supported by your browser. WTF dude.
+		        </canvas>
+            </div>
+            <script>
+             function updateCanvas() {
+                 var canvas = document.querySelector("#paintableCanvas");
+                 var ctx = canvas.getContext("2d");
+                 
+             }
+            </script>
+        </article></section>
+        
+    </body>
+</html>
