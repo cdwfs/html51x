@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+	    <meta charset="utf-8"/>
+	    <title>HTML5.2x Week 4</title>
+    </head>
+    <body>
+        <P><B>NOTE:</B> This page must served over HTTP; file:// doesn't work.</P>
+        <P>Dedicated Web Workers are local to a given page/tab.</P>
+        
+        <P>Worker scripts have restricted access to the browser environment.<BR>
+            <EM>Workers *can* access:</EM>EM>
+            <UL>
+                <LI>the navigator object</LI>
+                <LI>the location object (read-only)</LI>
+                <LI>XMLHttpRequest</LI>
+                <LI>setTimeout(), clearTimeout(), setInterval(), clearInterval()</LI>
+                <LI>the Application Cache</LI>
+                <LI>external scripts (via the importScripts() function)</LI>
+                <LI>spawning other Web Workers.</LI>
+            </UL>
+            <EM>Workers *can not* access:</EM>
+            <UL>
+                <LI>the DOM (it's not thread-safe)</LI>
+                <LI>The window object</LI>
+                <LI>the document object</LI>
+                <LI>the parent object</LI>
+                <LI>alert()</LI>
+                <LI>Original objects sent using postMessage()
+                    <UL>
+                        <LI>an extension for "transferable objects" has already been proposed for HTML 5.1</LI>
+                    </UL></LI>
+                <LI>Canvas
+                    <UL>
+                        <LI>HTML 5.1 proposes a "canvas proxy" to work around this restriction.</LI>
+                    </UL></LI>
+            </UL>
+            <P>Want to debug Web Workers? <A HREF="https://blog.chromium.org/2012/04/debugging-web-workers-with-chrome.html">Here</A>'s how in Chrome.</P>
+            <script>
+             "use strict";
+             // Initialize a worker with a JS source file to execute:
+             var worker = new Worker("52x_week4_worker.js");
+             // Callback to receive messages from worker
+             worker.onmessage = function(event) {
+                 console.log('received from worker: ' + event.data);
+             };
+             // Handle worker errors
+             worker.onerror = function(event) {
+                 alert('worker error: ' + event.message);
+             }
+             // Pass data to the worker through messages, which can take
+             // any JS object. Messages are *always* copies of the specified
+             // object.
+             worker.postMessage("Hello");
+             var personObject = {'firstName': 'Shmoove', 'lastName':'B'};
+             worker.postMessage(personObject);
+             // Kill a worker with worker.terminate()
+             setTimeout( function() {
+                 worker.terminate();
+                 document.body.appendChild(document.createTextNode("10 seconds elapsed; worker has been killed."));
+             }, 10000);
+            </script>
+    </body>
+</html>
